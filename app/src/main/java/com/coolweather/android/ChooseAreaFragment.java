@@ -31,22 +31,26 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
-/**
- * Created by GuiltyCrown on 2017/7/20.
- */
-
 public class ChooseAreaFragment extends Fragment {
 
     private static final String TAG ="ChooseAreaFragment";
+
     public static final int LEVEL_PROVINCE = 0;
+
     public static final int LEVEL_CITY = 1;
+
     public static final int LEVEL_COUNTY = 2;
 
     private ProgressDialog progressDialog;
+
     private TextView titleText;
+
     private Button backButton;
+
     private ListView listView;
+
     private ArrayAdapter<String> adapter;
+
     private List<String> dataList = new ArrayList<>();
 
     /**
@@ -106,10 +110,17 @@ public class ChooseAreaFragment extends Fragment {
                     queryCounties();
                 }else if (currentLevel == LEVEL_COUNTY){
                     String weatherId = countyList.get(position).getWeatherId();
-                    Intent intent = new Intent(getActivity(), WeatherActivity.class);
-                    intent.putExtra("weather_id",weatherId);
-                    startActivity(intent);
-                    getActivity().finish();
+                    if(getActivity() instanceof MainActivity){
+                        Intent intent = new Intent(getActivity(), WeatherActivity.class);
+                        intent.putExtra("weather_id",weatherId);
+                        startActivity(intent);
+                        getActivity().finish();
+                    }else if(getActivity() instanceof WeatherActivity){
+                        WeatherActivity activity = (WeatherActivity)getActivity();
+                        activity.drawerLayout.closeDrawers();
+                        activity.swipeRefresh.setRefreshing(true);
+                        activity.requestWeather(weatherId);
+                    }
                 }
             }
         });
@@ -200,7 +211,7 @@ public class ChooseAreaFragment extends Fragment {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String responseText = response.body().string();
-                boolean result = false;
+                    boolean result = false;
                 if ("province".equals(type)){
                     result = Utility.handleProvinceResponse(responseText);
                 }else if("city".equals(type)){
